@@ -1,0 +1,75 @@
+import json
+from datetime import datetime
+
+transactions = []
+
+def load_transactions():
+    try:
+        with open("transactions.json", "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+
+def save_transactions():
+    with open("transactions.json", "w") as file:
+        json.dump(transactions, file)
+
+def add_transaction():
+    date = datetime.now().strftime("%Y-%m-%d")
+    category = input("Enter the category: ")
+    amount = float(input("Enter the amount: "))
+    trans_type = input("Enter the transaction type (Income/Expense): ").capitalize()
+    transactions.append({
+        "date": date,
+        "category": category,
+        "amount": amount,
+        "type": trans_type
+    })
+    save_transactions()
+    print("Transaction added successfully.")
+
+def calculate_budget():
+    income = sum(trans["amount"] for trans in transactions if trans["type"] == "Income")
+    expenses = sum(trans["amount"] for trans in transactions if trans["type"] == "Expense")
+    budget = income - expenses
+    return budget
+    
+def analyze_expenses():
+    expenses_by_category = {}
+    for trans in transactions:
+        if trans["type"] == "Expense":
+            category = trans["category"]
+            amount = trans["amount"]
+            if category in expenses_by_category:
+                expenses_by_category[category] += amount
+            else:
+                expenses_by_category[category] = amount
+
+    if expenses_by_category:
+        print("\nExpense Analysis:")
+        for category, total_amount in expenses_by_category.items():
+            print(f"{category}: ${total_amount:.2f}")
+    else:
+        print("\nNo expenses to analyze.")
+
+while True:
+    print("\nBudget Tracker\n")
+    print("1. Add Transaction")
+    print("2. Calculate Budget")
+    print("3. Analyze Expenses")
+    print("4. Quit")
+
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        add_transaction()
+    elif choice == "2":
+        budget = calculate_budget()
+        print(f"Remaining budget: ${budget:.2f}")
+    elif choice == "3":
+        analyze_expenses()
+    elif choice == "4":
+        print("Goodbye!")
+        break
+    else:
+        print("Invalid choice. Please try again.")
