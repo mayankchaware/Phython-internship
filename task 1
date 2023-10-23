@@ -1,0 +1,83 @@
+import json
+from datetime import datetime
+
+tasks = []
+
+def load_tasks():
+    try:
+        with open("tasks.json", "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+
+def save_tasks():
+    with open("tasks.json", "w") as file:
+        json.dump(tasks, file)
+
+tasks = load_tasks()
+
+def add_task():
+    task_name = input("Enter task name: ")
+    task_priority = input("Enter task priority (High/Medium/Low): ").capitalize()
+    due_date_str = input("Enter due date (YYYY-MM-DD): ")
+    due_date = datetime.strptime(due_date_str, "%Y-%m-%d")
+    tasks.append({
+        "name": task_name,
+        "priority": task_priority,
+        "due_date": due_date.strftime("%Y-%m-%d"),
+        "completed": False
+    })
+    save_tasks()
+    print("Task added successfully.")
+
+def remove_task():
+    display_tasks()
+    task_index = int(input("Enter the task number to remove: ")) - 1
+    if 0 <= task_index < len(tasks):
+        removed_task = tasks.pop(task_index)
+        save_tasks()
+        print(f"Removed task: {removed_task['name']}")
+    else:
+        print("Invalid task number.")
+
+def mark_completed():
+    display_tasks()
+    task_index = int(input("Enter the task number to mark as completed: ")) - 1
+    if 0 <= task_index < len(tasks):
+        tasks[task_index]["completed"] = True
+        save_tasks()
+        print("Task marked as completed.")
+    else:
+        print("Invalid task number.")
+
+def display_tasks():
+    if not tasks:
+        print("No tasks found.")
+    else:
+        for index, task in enumerate(tasks):
+            status = "Done" if task["completed"] else "Pending"
+            print(f"{index + 1}. {task['name']} (Priority: {task['priority']}, Due Date: {task['due_date']}, Status: {status})")
+
+while True:
+    print("\nTo-Do List Application\n")
+    print("1. Add Task")
+    print("2. Remove Task")
+    print("3. Mark Task as Completed")
+    print("4. Display Tasks")
+    print("5. Quit")
+
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        add_task()
+    elif choice == "2":
+        remove_task()
+    elif choice == "3":
+        mark_completed()
+    elif choice == "4":
+        display_tasks()
+    elif choice == "5":
+        print("Goodbye!")
+        break
+    else:
+        print("Invalid choice. Please try again.")
